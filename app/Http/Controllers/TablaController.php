@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Tabla;
+use App\Models\Categoria;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use PDF;
 
 class TablaController extends Controller
 {
@@ -19,6 +21,20 @@ class TablaController extends Controller
         return view('tabla.index', compact('tablas'));
     }
 
+    public function qr(Tabla $tablas){
+		return view("tabla.qr",compact("tablas"));
+}
+
+public function pdf()
+{
+    $tablas = Tabla::paginate();
+    $pdf =PDF::loadView('tabla.pdf',['tablas'=>$tablas]);
+
+    return $pdf->stream();
+    /* return view('tabla.pdf', compact('tablas')); */
+}
+
+
     /**
      * Show the form for creating a new resource.
      *
@@ -26,7 +42,8 @@ class TablaController extends Controller
      */
     public function create()
     {
-        return view('tabla.create');
+         return view('tabla.create');
+
     }
 
     /**
@@ -37,6 +54,26 @@ class TablaController extends Controller
      */
     public function store(Request $request)
     {
+        $campos=[
+            'marca' => 'required|string|max:30',
+            'modelo'=> 'required|string|max:35',
+            'tamaño'=>'',
+            'volumen'=>'numeric|between:15,110',
+            'num_quillas'=>'numeric|between:0,5',
+            'foto' => 'mimes:jpeg,png,jpg'
+        ];
+
+        $mensaje=[
+            'required' =>'El campo :attribute es requerido',
+            'foto.mimes' =>'La foto debe ser un archivo jpg o png',
+            'volumen.numeric'=>'Introduzca un volumen valido',
+            'num_quillas.numeric'=>'Introduzca un numero de quillas valido, entre 0 y 5'
+
+
+
+        ];
+        $this->validate($request,$campos, $mensaje);
+
         $datosTabla = request()->except('_token', 'Enviar');
         if ($request->hasFile('foto')) {
             $datosTabla['foto'] = $request->file('foto')->store('uploads', 'public');
@@ -52,6 +89,10 @@ class TablaController extends Controller
      * @param  \App\Models\Tabla  $tabla
      * @return \Illuminate\Http\Response
      */
+
+
+
+
     public function show(Tabla $tabla)
     {
         //
@@ -78,7 +119,7 @@ class TablaController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $datosTabla = request()->except('_token', 'Enviar');
+        $datosTabla = request()->except('_token', 'Enviar', '_method');
         Tabla::where('id', '=', $id)->update($datosTabla);
 
         if ($request->hasFile('foto')) {
@@ -88,7 +129,7 @@ class TablaController extends Controller
         }
 
         $tabla = Tabla::findOrFail($id);
-        return view('tabla.edit', compact('tabla'));
+        return redirect('tablas');
     }
 
     /**

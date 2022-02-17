@@ -22,7 +22,13 @@ class TablaFactory extends Factory
     public function definition()
     {
         return [
-            //
+
+                'marca' => $this->faker->word(),
+                'modelo' => $this->faker->word(),
+                'tamaño' => $this->faker->randomFloat($nbMaxDecimals = NULL, $min = 5.0, $max = 10.0),
+                'volumen' => $this->faker->  numberBetween($min = 23, $max = 50),
+                'num_quillas' => $this->faker->  numberBetween($min = 0, $max = 5),
+
         ];
     }
 }

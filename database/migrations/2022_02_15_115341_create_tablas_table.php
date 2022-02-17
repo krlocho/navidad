@@ -20,7 +20,10 @@ class CreateTablasTable extends Migration
             $table->string('tamaño');
             $table->string('volumen');
             $table->string('num_quillas');
-            $table->string('foto');
+            $table->string('foto')->nullable();
+            $table->date('f_creacion')->nullable();
+            $table->bigInteger('categoria_id')->unsigned();
+            $table->foreign('categoria_id')->references('id')->on('categorias')->onDelete('cascade');
             $table->timestamps();
         });
     }
